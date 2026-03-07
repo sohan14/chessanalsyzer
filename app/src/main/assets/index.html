@@ -1,113 +1,272 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chess Analyzer</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Chess Analyzer</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="app">
 
-    <!-- Header -->
-    <header>
-        <div class="logo">♟ Chess Analyzer</div>
-        <div class="header-actions">
-            <span id="spinner" class="spinner"></span>
-            <button class="btn btn-secondary" id="flip-btn" title="Flip board">⇅ Flip</button>
-            <button class="btn btn-primary" id="share-btn" title="Load from shared screenshot">📷 Image</button>
-        </div>
-    </header>
+<!-- Header -->
+<header>
+  <span class="logo">♟</span>
+  <span class="logo-text">Chess Analyzer</span>
+  <div class="header-tabs">
+    <button class="htab active" data-htab="analyze">Analyze</button>
+    <button class="htab" data-htab="review">Review</button>
+    <button class="htab" data-htab="coach">Coach</button>
+  </div>
+  <span id="spinner" class="spinner"></span>
+  <button class="icon-btn" id="settings-btn" title="Settings">⚙</button>
+</header>
 
-    <!-- Main -->
-    <main>
-        <!-- Board + Eval bar -->
-        <div id="board-section">
-            <div id="eval-bar-wrap">
-                <div id="eval-bar">
-                    <div id="eval-white-fill" style="height:50%"></div>
-                </div>
-                <div id="eval-label">0.0</div>
-            </div>
-            <div id="board-wrap">
-                <canvas id="board-canvas"></canvas>
-            </div>
-        </div>
-
-        <!-- Analysis panel -->
-        <div id="analysis-panel">
-
-            <!-- FEN input -->
-            <div class="panel-card">
-                <h3>Position</h3>
-                <div id="fen-row">
-                    <input id="fen-input" type="text" placeholder="Paste FEN or load from image…" autocomplete="off" spellcheck="false">
-                    <button class="btn btn-primary" id="analyze-btn">Go</button>
-                </div>
-                <div id="side-row">
-                    <label>Side to move:</label>
-                    <div class="side-toggle">
-                        <button class="side-btn active" data-side="w">White</button>
-                        <button class="side-btn" data-side="b">Black</button>
-                    </div>
-                    <label style="margin-left:auto">Depth:</label>
-                    <select id="depth-select">
-                        <option value="2">2</option>
-                        <option value="3" selected>3</option>
-                        <option value="4">4</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Engine lines -->
-            <div class="panel-card">
-                <h3>Engine Lines</h3>
-                <div id="engine-lines">
-                    <div class="empty-state">Analysing…</div>
-                </div>
-            </div>
-
-            <!-- Move classification -->
-            <div class="panel-card">
-                <h3>Move Quality</h3>
-                <div id="move-class-content">
-                    <div class="empty-state">—</div>
-                </div>
-            </div>
-
-            <!-- Strategic plans -->
-            <div class="panel-card">
-                <h3>Plans</h3>
-                <ul id="plans-list" class="plan-list">
-                    <li>Loading…</li>
-                </ul>
-            </div>
-
-            <!-- Threats -->
-            <div class="panel-card">
-                <h3>Threats &amp; Tactics</h3>
-                <ul id="threats-list" class="threat-list">
-                    <li>Loading…</li>
-                </ul>
-            </div>
-
-        </div><!-- /analysis-panel -->
-    </main>
-
-</div><!-- /app -->
-
-<!-- Image detection modal -->
-<div id="img-modal">
-    <img id="shared-img" alt="Shared board screenshot">
-    <div id="detect-message">Tap "Detect Board" to analyse this position.</div>
-    <div class="modal-actions">
-        <button class="btn btn-primary" id="detect-btn">Detect Board</button>
-        <button class="btn btn-secondary" id="cancel-btn">Cancel</button>
-    </div>
+<!-- Black player -->
+<div class="player-strip" id="black-strip">
+  <div class="player-left">
+    <div class="player-icon">♚</div>
+    <div class="player-name" id="black-name">Black</div>
+  </div>
+  <div class="player-right">
+    <div class="accuracy-pill hidden" id="black-accuracy-pill"></div>
+    <div class="captured-wrap" id="white-caps"></div>
+  </div>
 </div>
 
+<!-- Board + Eval -->
+<div id="board-area">
+  <div id="eval-bar-wrap">
+    <div id="eval-bar">
+      <div id="eval-black-fill" style="flex:1"></div>
+      <div id="eval-white-fill" style="flex:1"></div>
+    </div>
+    <div id="eval-score">0.0</div>
+  </div>
+  <div id="board-container">
+    <div id="board-grid" data-theme="brown"></div>
+    <canvas id="arrow-canvas"></canvas>
+    <div id="rank-labels">
+      <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+    </div>
+  </div>
+</div>
+
+<!-- File labels -->
+<div id="file-labels">
+  <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+</div>
+
+<!-- White player -->
+<div class="player-strip" id="white-strip">
+  <div class="player-left">
+    <div class="player-icon">♔</div>
+    <div class="player-name" id="white-name">White</div>
+  </div>
+  <div class="player-right">
+    <div class="accuracy-pill hidden" id="white-accuracy-pill"></div>
+    <div class="captured-wrap" id="black-caps"></div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div id="ctrl-bar">
+  <button class="ctrl-btn" id="paste-btn">📋 PGN/FEN</button>
+  <button class="ctrl-btn" id="flip-btn">⇅ Flip</button>
+  <button class="ctrl-btn" id="prev-btn">◀</button>
+  <button class="ctrl-btn" id="next-btn">▶</button>
+  <button class="ctrl-btn" id="image-btn">📷 Image</button>
+  <button class="ctrl-btn primary" id="analyze-btn">⚡ Analyze</button>
+</div>
+
+<!-- Analysis panel -->
+<div id="analysis-panel">
+
+  <!-- ═══ TAB: Analyze ═══ -->
+  <div id="htab-analyze" class="htab-content active">
+
+    <div id="opening-bar" class="hidden">
+      <span id="opening-eco"></span>
+      <span id="opening-name-text"></span>
+    </div>
+
+    <div>
+      <div class="section-header">Engine Lines <span id="depth-badge" class="badge">D3</span></div>
+      <div id="engine-lines">
+        <div class="engine-line"><span class="line-rank"></span><span class="line-score zero">—</span><span class="line-moves">Press Analyze</span></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="analysis-card">
+        <div class="card-header">Plans</div>
+        <ul id="plans-list" class="analysis-list"><li>—</li></ul>
+      </div>
+      <div class="analysis-card">
+        <div class="card-header">Threats</div>
+        <ul id="threats-list" class="threat-list analysis-list"><li>—</li></ul>
+      </div>
+    </div>
+
+    <div class="depth-row">
+      <label>Depth:</label>
+      <div class="depth-btns">
+        <button class="depth-btn" data-depth="2">2</button>
+        <button class="depth-btn active" data-depth="3">3</button>
+        <button class="depth-btn" data-depth="4">4</button>
+      </div>
+    </div>
+
+  </div><!-- /analyze -->
+
+  <!-- ═══ TAB: Review ═══ -->
+  <div id="htab-review" class="htab-content">
+
+    <div id="review-import">
+      <button class="btn btn-primary full-width" id="review-paste-btn">📋 Paste PGN to Review Game</button>
+      <div style="margin-top:8px;font-size:11px;color:var(--text2);text-align:center;">
+        💡 Copy a game PGN from Chess.com → Share → Copy PGN, then paste here
+      </div>
+    </div>
+
+    <div id="accuracy-report" class="hidden">
+      <div class="acc-card white-acc">
+        <div class="acc-player">White</div>
+        <div class="acc-score" id="white-acc-score">—</div>
+        <div class="acc-label">accuracy</div>
+      </div>
+      <div class="acc-divider"></div>
+      <div class="acc-card black-acc">
+        <div class="acc-player">Black</div>
+        <div class="acc-score" id="black-acc-score">—</div>
+        <div class="acc-label">accuracy</div>
+      </div>
+    </div>
+
+    <div id="class-summary" class="hidden"></div>
+
+    <div id="move-list"></div>
+
+  </div><!-- /review -->
+
+  <!-- ═══ TAB: Coach ═══ -->
+  <div id="htab-coach" class="htab-content">
+
+    <div id="coach-advice">
+      <div class="coach-empty">Analyze a position first, then tap "Ask Coach" for personalized advice.</div>
+    </div>
+
+    <div class="coach-questions">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:2px;">Quick questions:</div>
+      <button class="q-btn" data-q="What is my best plan in this position?">📌 What is my best plan?</button>
+      <button class="q-btn" data-q="What are the key weaknesses in my position and how do I fix them?">🔍 What are my weaknesses?</button>
+      <button class="q-btn" data-q="What tactical opportunities exist in this position?">⚔️ Any tactical shots?</button>
+      <button class="q-btn" data-q="Explain this opening and what ideas both sides should follow.">📖 Explain this opening</button>
+      <button class="q-btn" data-q="How do I improve from this position? What are the key principles?">📈 How do I improve?</button>
+    </div>
+
+    <button class="btn btn-primary" id="ask-coach-btn" style="width:100%">🤖 Ask Coach</button>
+
+    <div class="coach-settings">
+      <div style="font-size:12px;font-weight:700;margin-bottom:6px;">AI Coach Settings</div>
+      <div class="setting-row">
+        <label>Claude API Key</label>
+        <input type="password" id="api-key-input" placeholder="sk-ant-...">
+        <button class="btn btn-secondary" id="save-key-btn">Save</button>
+      </div>
+      <div class="setting-hint">
+        Optional: Add your Claude API key for advanced AI coaching with natural language explanations.<br>
+        Get a free key at <strong>console.anthropic.com</strong><br>
+        Without a key, smart local analysis is used instead.
+      </div>
+    </div>
+
+  </div><!-- /coach -->
+
+</div><!-- /analysis-panel -->
+</div><!-- /app -->
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ══ MODALS ══ -->
+
+<!-- Image -->
+<div id="img-modal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-title">📷 Load from Screenshot</div>
+    <div class="modal-hint">
+      Share a chess board screenshot here.<br>
+      <strong>From Chess.com app:</strong> Take a phone screenshot while viewing a game, then share that screenshot to Chess Analyzer.
+    </div>
+    <img id="shared-img" class="hidden" alt="Board screenshot">
+    <div id="detect-status"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="cancel-img-btn">Cancel</button>
+      <button class="btn btn-primary" id="detect-btn" disabled>Detect Board</button>
+    </div>
+  </div>
+</div>
+
+<!-- Paste PGN/FEN -->
+<div id="paste-modal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-title">📋 Paste PGN or FEN</div>
+    <textarea id="paste-input" placeholder="Paste a FEN position or full PGN game here...
+
+FEN example:
+r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3
+
+PGN example:
+[White &quot;Magnus&quot;]
+[Black &quot;Hikaru&quot;]
+1. e4 e5 2. Nf3 Nc6 ..."></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="cancel-paste-btn">Cancel</button>
+      <button class="btn btn-primary" id="load-paste-btn">Load</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings -->
+<div id="settings-modal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-title">⚙ Settings</div>
+    <div class="setting-row">
+      <label>Board theme</label>
+      <select id="board-theme-sel">
+        <option value="brown">Brown (Chess.com)</option>
+        <option value="green">Green (Classic)</option>
+        <option value="blue">Blue (Slate)</option>
+        <option value="purple">Purple</option>
+      </select>
+    </div>
+    <div class="setting-row" style="margin-top:10px;">
+      <label>Voice moves</label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="voice-toggle">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="close-settings-btn">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Promotion picker -->
+<div id="promo-modal" class="modal-overlay">
+  <div class="modal-card promo-card">
+    <div class="modal-title">Choose Promotion</div>
+    <div id="promo-choices"></div>
+  </div>
+</div>
+
+<script src="openings.js"></script>
 <script src="chess-engine.js"></script>
+<script src="pgn-parser.js"></script>
 <script src="board-detector.js"></script>
+<script src="coach.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
