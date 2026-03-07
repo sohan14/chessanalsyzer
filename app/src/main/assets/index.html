@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chess Analyzer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+    <!-- Header -->
+    <header>
+        <div class="logo">♟ Chess Analyzer</div>
+        <div class="header-actions">
+            <span id="spinner" class="spinner"></span>
+            <button class="btn btn-secondary" id="flip-btn" title="Flip board">⇅ Flip</button>
+            <button class="btn btn-primary" id="share-btn" title="Load from shared screenshot">📷 Image</button>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main>
+        <!-- Board + Eval bar -->
+        <div id="board-section">
+            <div id="eval-bar-wrap">
+                <div id="eval-bar">
+                    <div id="eval-white-fill" style="height:50%"></div>
+                </div>
+                <div id="eval-label">0.0</div>
+            </div>
+            <div id="board-wrap">
+                <canvas id="board-canvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Analysis panel -->
+        <div id="analysis-panel">
+
+            <!-- FEN input -->
+            <div class="panel-card">
+                <h3>Position</h3>
+                <div id="fen-row">
+                    <input id="fen-input" type="text" placeholder="Paste FEN or load from image…" autocomplete="off" spellcheck="false">
+                    <button class="btn btn-primary" id="analyze-btn">Go</button>
+                </div>
+                <div id="side-row">
+                    <label>Side to move:</label>
+                    <div class="side-toggle">
+                        <button class="side-btn active" data-side="w">White</button>
+                        <button class="side-btn" data-side="b">Black</button>
+                    </div>
+                    <label style="margin-left:auto">Depth:</label>
+                    <select id="depth-select">
+                        <option value="2">2</option>
+                        <option value="3" selected>3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Engine lines -->
+            <div class="panel-card">
+                <h3>Engine Lines</h3>
+                <div id="engine-lines">
+                    <div class="empty-state">Analysing…</div>
+                </div>
+            </div>
+
+            <!-- Move classification -->
+            <div class="panel-card">
+                <h3>Move Quality</h3>
+                <div id="move-class-content">
+                    <div class="empty-state">—</div>
+                </div>
+            </div>
+
+            <!-- Strategic plans -->
+            <div class="panel-card">
+                <h3>Plans</h3>
+                <ul id="plans-list" class="plan-list">
+                    <li>Loading…</li>
+                </ul>
+            </div>
+
+            <!-- Threats -->
+            <div class="panel-card">
+                <h3>Threats &amp; Tactics</h3>
+                <ul id="threats-list" class="threat-list">
+                    <li>Loading…</li>
+                </ul>
+            </div>
+
+        </div><!-- /analysis-panel -->
+    </main>
+
+</div><!-- /app -->
+
+<!-- Image detection modal -->
+<div id="img-modal">
+    <img id="shared-img" alt="Shared board screenshot">
+    <div id="detect-message">Tap "Detect Board" to analyse this position.</div>
+    <div class="modal-actions">
+        <button class="btn btn-primary" id="detect-btn">Detect Board</button>
+        <button class="btn btn-secondary" id="cancel-btn">Cancel</button>
+    </div>
+</div>
+
+<script src="chess-engine.js"></script>
+<script src="board-detector.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

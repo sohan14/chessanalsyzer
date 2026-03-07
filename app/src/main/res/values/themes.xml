@@ -1,0 +1,10 @@
+<resources>
+    <style name="Theme.ChessAnalyzer" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/chess_dark_bg</item>
+        <item name="colorPrimaryVariant">@color/chess_panel_bg</item>
+        <item name="colorOnPrimary">@color/chess_text</item>
+        <item name="android:statusBarColor">@color/chess_dark_bg</item>
+        <item name="android:navigationBarColor">@color/chess_dark_bg</item>
+        <item name="android:windowBackground">@color/chess_dark_bg</item>
+    </style>
+</resources>
