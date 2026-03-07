@@ -7,212 +7,384 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="app">
 
-<!-- Header -->
-<header>
-  <span class="logo">♟</span>
-  <span class="logo-text">Chess Analyzer</span>
-  <div class="header-tabs">
-    <button class="htab active" data-htab="analyze">Analyze</button>
-    <button class="htab" data-htab="review">Review</button>
-    <button class="htab" data-htab="coach">Coach</button>
-  </div>
-  <span id="spinner" class="spinner"></span>
-  <button class="icon-btn" id="settings-btn" title="Settings">⚙</button>
-</header>
-
-<!-- Black player -->
-<div class="player-strip" id="black-strip">
-  <div class="player-left">
-    <div class="player-icon">♚</div>
-    <div class="player-name" id="black-name">Black</div>
-  </div>
-  <div class="player-right">
-    <div class="accuracy-pill hidden" id="black-accuracy-pill"></div>
-    <div class="captured-wrap" id="white-caps"></div>
-  </div>
-</div>
-
-<!-- Board + Eval -->
-<div id="board-area">
-  <div id="eval-bar-wrap">
-    <div id="eval-bar">
-      <div id="eval-black-fill" style="flex:1"></div>
-      <div id="eval-white-fill" style="flex:1"></div>
+<!-- ================================================================
+     SCREEN 1: DASHBOARD
+     ================================================================ -->
+<div id="screen-dash" class="screen active">
+  <div class="dash-header">
+    <div class="dash-logo">&#9819;</div>
+    <div class="dash-title-group">
+      <div class="dash-title">Chess Analyzer</div>
+      <div class="dash-subtitle">Premium Analysis Engine</div>
     </div>
-    <div id="eval-score">0.0</div>
+    <button class="icon-btn" id="dash-settings-btn" title="Settings">&#9881;</button>
   </div>
-  <div id="board-container">
-    <div id="board-grid" data-theme="brown"></div>
-    <canvas id="arrow-canvas"></canvas>
-    <div id="rank-labels">
-      <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
-    </div>
-  </div>
-</div>
-
-<!-- File labels -->
-<div id="file-labels">
-  <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
-</div>
-
-<!-- White player -->
-<div class="player-strip" id="white-strip">
-  <div class="player-left">
-    <div class="player-icon">♔</div>
-    <div class="player-name" id="white-name">White</div>
-  </div>
-  <div class="player-right">
-    <div class="accuracy-pill hidden" id="white-accuracy-pill"></div>
-    <div class="captured-wrap" id="black-caps"></div>
-  </div>
-</div>
-
-<!-- Controls -->
-<div id="ctrl-bar">
-  <button class="ctrl-btn" id="paste-btn">📋 PGN/FEN</button>
-  <button class="ctrl-btn" id="flip-btn">⇅ Flip</button>
-  <button class="ctrl-btn" id="prev-btn">◀</button>
-  <button class="ctrl-btn" id="next-btn">▶</button>
-  <button class="ctrl-btn" id="image-btn">📷 Image</button>
-  <button class="ctrl-btn primary" id="analyze-btn">⚡ Analyze</button>
-</div>
-
-<!-- Analysis panel -->
-<div id="analysis-panel">
-
-  <!-- ═══ TAB: Analyze ═══ -->
-  <div id="htab-analyze" class="htab-content active">
-
-    <div id="opening-bar" class="hidden">
-      <span id="opening-eco"></span>
-      <span id="opening-name-text"></span>
-    </div>
-
-    <div>
-      <div class="section-header">Engine Lines <span id="depth-badge" class="badge">D3</span></div>
-      <div id="engine-lines">
-        <div class="engine-line"><span class="line-rank"></span><span class="line-score zero">—</span><span class="line-moves">Press Analyze</span></div>
+  <div class="dash-content">
+    <div class="dash-actions">
+      <div class="dash-card" id="dash-paste-btn">
+        <div class="dash-card-icon">&#128203;</div>
+        <div class="dash-card-title">Paste PGN</div>
+        <div class="dash-card-desc">Import a game to analyze</div>
+      </div>
+      <div class="dash-card" id="dash-fen-btn">
+        <div class="dash-card-icon">&#9823;</div>
+        <div class="dash-card-title">Analyze FEN</div>
+        <div class="dash-card-desc">Analyze a specific position</div>
+      </div>
+      <div class="dash-card" id="dash-screenshot-btn">
+        <div class="dash-card-icon">&#128247;</div>
+        <div class="dash-card-title">Screenshot</div>
+        <div class="dash-card-desc">Detect board from image</div>
+      </div>
+      <div class="dash-card" id="dash-new-btn">
+        <div class="dash-card-icon">&#9812;</div>
+        <div class="dash-card-title">New Board</div>
+        <div class="dash-card-desc">Start from initial position</div>
       </div>
     </div>
 
-    <div class="two-col">
+    <div class="dash-section-title">Daily Tip</div>
+    <div class="dash-tip">
+      <div class="dash-tip-label">Tip of the Day</div>
+      <div class="dash-tip-text" id="daily-tip"></div>
+    </div>
+
+    <div id="dash-stats-section" class="hidden">
+      <div class="dash-section-title">Your Stats</div>
+      <div class="dash-stats" id="dash-stats"></div>
+    </div>
+
+    <div class="dash-section-title">Recent Games</div>
+    <div class="recent-games" id="recent-games-list">
+      <div class="dash-empty">No games analyzed yet. Paste a PGN or start a new board to begin.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     SCREEN 2: ANALYSIS
+     ================================================================ -->
+<div id="screen-analysis" class="screen">
+  <!-- Nav bar -->
+  <div class="nav-bar">
+    <button class="nav-back" id="analysis-back-btn">&#8592;</button>
+    <div class="nav-title">Analysis</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="engine">Engine</button>
+      <button class="nav-tab" data-tab="insights">Insights</button>
+      <button class="nav-tab" data-tab="coach">Coach</button>
+    </div>
+    <span id="spinner" class="spinner"></span>
+    <button class="icon-btn" id="settings-btn" title="Settings">&#9881;</button>
+  </div>
+
+  <!-- Black player strip -->
+  <div class="player-strip" id="black-strip">
+    <div class="player-left">
+      <div class="player-icon">&#9818;</div>
+      <div class="player-name" id="black-name">Black</div>
+    </div>
+    <div class="player-right">
+      <div class="accuracy-pill hidden" id="black-accuracy-pill"></div>
+      <div class="captured-wrap" id="white-caps"></div>
+    </div>
+  </div>
+
+  <!-- Board + Eval -->
+  <div id="board-area">
+    <div id="eval-bar-wrap">
+      <div id="eval-bar">
+        <div id="eval-black-fill" style="flex:1"></div>
+        <div id="eval-white-fill" style="flex:1"></div>
+      </div>
+      <div id="eval-score">0.0</div>
+    </div>
+    <div id="board-container">
+      <div id="board-grid" data-theme="brown"></div>
+      <canvas id="arrow-canvas"></canvas>
+    </div>
+  </div>
+  <div id="file-labels">
+    <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+  </div>
+
+  <!-- White player strip -->
+  <div class="player-strip" id="white-strip">
+    <div class="player-left">
+      <div class="player-icon">&#9812;</div>
+      <div class="player-name" id="white-name">White</div>
+    </div>
+    <div class="player-right">
+      <div class="accuracy-pill hidden" id="white-accuracy-pill"></div>
+      <div class="captured-wrap" id="black-caps"></div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div id="ctrl-bar">
+    <button class="ctrl-btn" id="first-btn">&#9664;&#9664;</button>
+    <button class="ctrl-btn" id="prev-btn">&#9664;</button>
+    <button class="ctrl-btn" id="next-btn">&#9654;</button>
+    <button class="ctrl-btn" id="last-btn">&#9654;&#9654;</button>
+    <div class="ctrl-sep"></div>
+    <button class="ctrl-btn" id="flip-btn">&#8693;</button>
+    <button class="ctrl-btn primary" id="analyze-btn">Analyze</button>
+    <button class="ctrl-btn" id="review-btn">Review</button>
+  </div>
+
+  <!-- Move list (visible during review) -->
+  <div id="analysis-move-list-wrap" class="hidden">
+    <div id="analysis-move-list" class="analysis-move-list scrollable"></div>
+  </div>
+
+  <!-- Analysis panel -->
+  <div id="analysis-panel" class="scrollable">
+
+    <!-- TAB: Engine -->
+    <div id="tab-engine" class="tab-content active">
+      <div id="opening-bar" class="hidden">
+        <span id="opening-eco"></span>
+        <span id="opening-name"></span>
+        <span id="opening-desc"></span>
+      </div>
+
+      <!-- Classification badge for current move -->
+      <div id="current-move-class" class="current-move-class hidden">
+        <div class="cmc-badge" id="cmc-badge"></div>
+        <div class="cmc-info">
+          <div class="cmc-san" id="cmc-san"></div>
+          <div class="cmc-desc" id="cmc-desc"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-header">Engine Lines <span id="depth-badge" class="badge">D3</span></div>
+        <div id="engine-lines">
+          <div class="engine-line"><span class="line-rank"></span><span class="line-score zero">--</span><span class="line-moves">Press Analyze or make a move</span></div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="analysis-card">
+          <div class="card-header">Plans</div>
+          <ul id="plans-list" class="analysis-list"><li>--</li></ul>
+        </div>
+        <div class="analysis-card">
+          <div class="card-header">Threats</div>
+          <ul id="threats-list" class="threat-list analysis-list"><li>--</li></ul>
+        </div>
+      </div>
+
+      <div class="depth-row">
+        <label>Depth:</label>
+        <div class="depth-btns">
+          <button class="depth-btn" data-depth="2">2</button>
+          <button class="depth-btn active" data-depth="3">3</button>
+          <button class="depth-btn" data-depth="4">4</button>
+          <button class="depth-btn" data-depth="5">5</button>
+        </div>
+        <button class="whatif-btn hidden" id="whatif-btn">What-If</button>
+      </div>
+    </div>
+
+    <!-- TAB: Insights -->
+    <div id="tab-insights" class="tab-content">
+      <div class="win-prob-container">
+        <div class="section-header">Win Probability</div>
+        <canvas id="win-prob-canvas" width="300" height="70"></canvas>
+      </div>
+
+      <div class="insight-row">
+        <div class="insight-card">
+          <div class="insight-card-title">White King Safety</div>
+          <div class="king-safety-label" id="wk-safety-label">--</div>
+          <div class="king-safety-bar"><div class="king-safety-fill" id="wk-safety-fill"></div></div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-card-title">Black King Safety</div>
+          <div class="king-safety-label" id="bk-safety-label">--</div>
+          <div class="king-safety-bar"><div class="king-safety-fill" id="bk-safety-fill"></div></div>
+        </div>
+      </div>
+
       <div class="analysis-card">
-        <div class="card-header">Plans</div>
-        <ul id="plans-list" class="analysis-list"><li>—</li></ul>
+        <div class="card-header">Piece Activity</div>
+        <ul id="piece-activity-list" class="piece-activity-list"></ul>
       </div>
-      <div class="analysis-card">
-        <div class="card-header">Threats</div>
-        <ul id="threats-list" class="threat-list analysis-list"><li>—</li></ul>
+
+      <div>
+        <div class="section-header">Tactical Alerts</div>
+        <div class="tactical-alerts" id="tactical-alerts">
+          <div class="tactical-alert"><span style="color:var(--text2);font-size:12px;">No alerts</span></div>
+        </div>
       </div>
-    </div>
 
-    <div class="depth-row">
-      <label>Depth:</label>
-      <div class="depth-btns">
-        <button class="depth-btn" data-depth="2">2</button>
-        <button class="depth-btn active" data-depth="3">3</button>
-        <button class="depth-btn" data-depth="4">4</button>
-      </div>
-    </div>
-
-  </div><!-- /analyze -->
-
-  <!-- ═══ TAB: Review ═══ -->
-  <div id="htab-review" class="htab-content">
-
-    <div id="review-import">
-      <button class="btn btn-primary full-width" id="review-paste-btn">📋 Paste PGN to Review Game</button>
-      <div style="margin-top:8px;font-size:11px;color:var(--text2);text-align:center;">
-        💡 Copy a game PGN from Chess.com → Share → Copy PGN, then paste here
+      <div class="heatmap-toggle">
+        <label class="toggle-switch">
+          <input type="checkbox" id="heatmap-toggle">
+          <span class="toggle-slider"></span>
+        </label>
+        <label style="font-size:12px;color:var(--text2);">Show attack heatmap</label>
       </div>
     </div>
 
-    <div id="accuracy-report" class="hidden">
-      <div class="acc-card white-acc">
-        <div class="acc-player">White</div>
-        <div class="acc-score" id="white-acc-score">—</div>
-        <div class="acc-label">accuracy</div>
+    <!-- TAB: Coach -->
+    <div id="tab-coach" class="tab-content">
+      <div class="coach-controls">
+        <div class="coach-level-btns">
+          <button class="level-btn" data-level="beginner">Beginner</button>
+          <button class="level-btn active" data-level="intermediate">Intermediate</button>
+          <button class="level-btn" data-level="advanced">Advanced</button>
+        </div>
       </div>
-      <div class="acc-divider"></div>
-      <div class="acc-card black-acc">
-        <div class="acc-player">Black</div>
-        <div class="acc-score" id="black-acc-score">—</div>
-        <div class="acc-label">accuracy</div>
+
+      <div class="voice-row mt-8">
+        <label>Voice:</label>
+        <select class="voice-select" id="voice-mode-sel">
+          <option value="off">Off</option>
+          <option value="mistakes" selected>Mistakes Only</option>
+          <option value="all">All Moves</option>
+        </select>
       </div>
-    </div>
 
-    <div id="class-summary" class="hidden"></div>
-
-    <div id="move-list"></div>
-
-  </div><!-- /review -->
-
-  <!-- ═══ TAB: Coach ═══ -->
-  <div id="htab-coach" class="htab-content">
-
-    <div id="coach-advice">
-      <div class="coach-empty">Analyze a position first, then tap "Ask Coach" for personalized advice.</div>
-    </div>
-
-    <div class="coach-questions">
-      <div style="font-size:11px;color:var(--text2);margin-bottom:2px;">Quick questions:</div>
-      <button class="q-btn" data-q="What is my best plan in this position?">📌 What is my best plan?</button>
-      <button class="q-btn" data-q="What are the key weaknesses in my position and how do I fix them?">🔍 What are my weaknesses?</button>
-      <button class="q-btn" data-q="What tactical opportunities exist in this position?">⚔️ Any tactical shots?</button>
-      <button class="q-btn" data-q="Explain this opening and what ideas both sides should follow.">📖 Explain this opening</button>
-      <button class="q-btn" data-q="How do I improve from this position? What are the key principles?">📈 How do I improve?</button>
-    </div>
-
-    <button class="btn btn-primary" id="ask-coach-btn" style="width:100%">🤖 Ask Coach</button>
-
-    <div class="coach-settings">
-      <div style="font-size:12px;font-weight:700;margin-bottom:6px;">AI Coach Settings</div>
-      <div class="setting-row">
-        <label>Claude API Key</label>
-        <input type="password" id="api-key-input" placeholder="sk-ant-...">
-        <button class="btn btn-secondary" id="save-key-btn">Save</button>
+      <div id="coach-advice" class="mt-8">
+        <div class="coach-empty">Make a move or analyze a position to get coaching advice.</div>
       </div>
-      <div class="setting-hint">
-        Optional: Add your Claude API key for advanced AI coaching with natural language explanations.<br>
-        Get a free key at <strong>console.anthropic.com</strong><br>
-        Without a key, smart local analysis is used instead.
+
+      <div id="style-analysis" class="hidden mt-8">
+        <div class="section-header">Game Style</div>
+        <div class="style-badge" id="style-badge"></div>
+        <p id="style-desc" style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.5;"></p>
       </div>
     </div>
 
-  </div><!-- /coach -->
+  </div>
+</div>
 
-</div><!-- /analysis-panel -->
-</div><!-- /app -->
+<!-- ================================================================
+     SCREEN 3: GAME REPORT
+     ================================================================ -->
+<div id="screen-report" class="screen">
+  <div class="nav-bar">
+    <button class="nav-back" id="report-back-btn">&#8592;</button>
+    <div class="nav-title">Game Report</div>
+    <button class="btn btn-sm btn-ghost" id="gen-puzzles-btn">Generate Puzzles</button>
+  </div>
+  <div class="report-content scrollable">
+    <div class="donut-row">
+      <div class="donut-card">
+        <canvas id="white-donut" width="100" height="100"></canvas>
+        <div class="donut-label">White</div>
+        <div class="donut-value" id="white-donut-val">--</div>
+      </div>
+      <div class="donut-card">
+        <canvas id="black-donut" width="100" height="100"></canvas>
+        <div class="donut-label">Black</div>
+        <div class="donut-value" id="black-donut-val">--</div>
+      </div>
+    </div>
 
-<!-- Toast -->
+    <div class="class-bar-wrap">
+      <div class="section-header">Classification Breakdown</div>
+      <div class="class-bar" id="class-bar"></div>
+      <div class="class-bar-legend" id="class-bar-legend"></div>
+    </div>
+
+    <div class="key-moments" id="key-moments">
+      <div class="section-header">Key Moments</div>
+    </div>
+
+    <div class="sw-cards" id="sw-cards"></div>
+
+    <div id="report-style" class="hidden" style="margin-bottom:12px;">
+      <div class="section-header">Playing Style</div>
+      <div class="style-badge" id="report-style-badge"></div>
+      <p id="report-style-desc" style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.5;"></p>
+    </div>
+
+    <div class="section-header">Full Move List</div>
+    <div id="report-move-list" class="report-move-list"></div>
+  </div>
+</div>
+
+<!-- ================================================================
+     SCREEN 4: PUZZLE
+     ================================================================ -->
+<div id="screen-puzzle" class="screen">
+  <div class="nav-bar">
+    <button class="nav-back" id="puzzle-back-btn">&#8592;</button>
+    <div class="nav-title">Puzzles</div>
+    <span id="puzzle-counter" style="font-size:12px;color:var(--text2);margin-right:8px;"></span>
+  </div>
+  <div class="puzzle-header">
+    <div class="puzzle-prompt" id="puzzle-prompt">Find the best move</div>
+    <div class="puzzle-subtext" id="puzzle-subtext"></div>
+  </div>
+  <div id="puzzle-board-area" style="display:flex;align-items:flex-start;padding:6px;flex-shrink:0;">
+    <div id="puzzle-eval-wrap" style="display:flex;flex-direction:column;align-items:center;gap:2px;margin-right:5px;">
+      <div id="puzzle-eval-bar" style="flex:1;width:16px;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:#111;display:flex;flex-direction:column;">
+        <div id="puzzle-eval-black" style="flex:1;background:#1a1a1a;transition:flex .4s;"></div>
+        <div id="puzzle-eval-white" style="flex:1;background:#f0f0f0;transition:flex .4s;"></div>
+      </div>
+    </div>
+    <div id="puzzle-board-container" style="position:relative;">
+      <div id="puzzle-board-grid" data-theme="brown" style="display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);border:2px solid #111;border-radius:3px;overflow:hidden;"></div>
+    </div>
+  </div>
+  <div class="puzzle-feedback" id="puzzle-feedback"></div>
+  <div class="puzzle-controls">
+    <button class="btn btn-secondary" id="puzzle-hint-btn">Hint</button>
+    <button class="btn btn-secondary" id="puzzle-show-btn">Show Answer</button>
+    <button class="btn btn-primary" id="puzzle-next-btn">Next Puzzle</button>
+  </div>
+  <div class="puzzle-hint hidden" id="puzzle-hint-area"></div>
+</div>
+
+<!-- ================================================================
+     MOVE DETAIL OVERLAY
+     ================================================================ -->
+<div class="move-detail-overlay" id="move-detail-overlay">
+  <div class="move-detail-panel">
+    <div class="detail-handle"></div>
+    <div class="detail-cls-banner" id="detail-cls-banner"></div>
+    <div class="detail-comparison">
+      <div class="detail-move-card">
+        <div class="detail-move-label played">You Played</div>
+        <div class="detail-move-san" id="detail-played-san"></div>
+        <div class="detail-move-eval" id="detail-played-eval"></div>
+      </div>
+      <div class="detail-move-card">
+        <div class="detail-move-label best">Best Was</div>
+        <div class="detail-move-san" id="detail-best-san"></div>
+        <div class="detail-move-eval" id="detail-best-eval"></div>
+      </div>
+    </div>
+    <div class="detail-explanation" id="detail-explanation"></div>
+    <div class="detail-actions">
+      <button class="btn btn-secondary" id="detail-close-btn">Close</button>
+      <button class="btn btn-primary" id="detail-practice-btn">Practice This</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     TOAST
+     ================================================================ -->
 <div id="toast"></div>
 
-<!-- ══ MODALS ══ -->
-
-<!-- Image -->
-<div id="img-modal" class="modal-overlay">
-  <div class="modal-card">
-    <div class="modal-title">📷 Load from Screenshot</div>
-    <div class="modal-hint">
-      Share a chess board screenshot here.<br>
-      <strong>From Chess.com app:</strong> Take a phone screenshot while viewing a game, then share that screenshot to Chess Analyzer.
-    </div>
-    <img id="shared-img" class="hidden" alt="Board screenshot">
-    <div id="detect-status"></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" id="cancel-img-btn">Cancel</button>
-      <button class="btn btn-primary" id="detect-btn" disabled>Detect Board</button>
-    </div>
-  </div>
-</div>
+<!-- ================================================================
+     MODALS
+     ================================================================ -->
 
 <!-- Paste PGN/FEN -->
 <div id="paste-modal" class="modal-overlay">
   <div class="modal-card">
-    <div class="modal-title">📋 Paste PGN or FEN</div>
-    <textarea id="paste-input" placeholder="Paste a FEN position or full PGN game here...
+    <div class="modal-title">Import Game</div>
+    <div class="modal-hint">
+      Paste a FEN position or full PGN game below.
+    </div>
+    <textarea id="paste-input" class="modal-textarea" placeholder="Paste FEN or PGN here...
 
 FEN example:
 r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3
@@ -228,10 +400,27 @@ PGN example:
   </div>
 </div>
 
+<!-- Image detection -->
+<div id="img-modal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-title">Load from Screenshot</div>
+    <div class="modal-hint">
+      Share a chess board screenshot to detect the position.<br>
+      <strong>From Chess.com:</strong> Take a screenshot, then share it here.
+    </div>
+    <img id="shared-img" class="hidden" alt="Board screenshot">
+    <div id="detect-status"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="cancel-img-btn">Cancel</button>
+      <button class="btn btn-primary" id="detect-btn" disabled>Detect Board</button>
+    </div>
+  </div>
+</div>
+
 <!-- Settings -->
 <div id="settings-modal" class="modal-overlay">
   <div class="modal-card">
-    <div class="modal-title">⚙ Settings</div>
+    <div class="modal-title">Settings</div>
     <div class="setting-row">
       <label>Board theme</label>
       <select id="board-theme-sel">
@@ -241,12 +430,28 @@ PGN example:
         <option value="purple">Purple</option>
       </select>
     </div>
-    <div class="setting-row" style="margin-top:10px;">
-      <label>Voice moves</label>
+    <div class="setting-row">
+      <label>Sound effects</label>
       <label class="toggle-switch">
-        <input type="checkbox" id="voice-toggle">
+        <input type="checkbox" id="sound-toggle" checked>
         <span class="toggle-slider"></span>
       </label>
+    </div>
+    <div class="setting-row">
+      <label>Voice coach</label>
+      <select id="settings-voice-sel">
+        <option value="off">Off</option>
+        <option value="mistakes" selected>Mistakes Only</option>
+        <option value="all">All Moves</option>
+      </select>
+    </div>
+    <div class="setting-row">
+      <label>Explanation level</label>
+      <select id="settings-level-sel">
+        <option value="beginner">Beginner</option>
+        <option value="intermediate" selected>Intermediate</option>
+        <option value="advanced">Advanced</option>
+      </select>
     </div>
     <div class="modal-actions">
       <button class="btn btn-primary" id="close-settings-btn">Done</button>
@@ -259,6 +464,18 @@ PGN example:
   <div class="modal-card promo-card">
     <div class="modal-title">Choose Promotion</div>
     <div id="promo-choices"></div>
+  </div>
+</div>
+
+<!-- What-If Results -->
+<div id="whatif-modal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-title">What-If Analysis</div>
+    <div class="modal-hint">Select a piece and see the probable outcomes.</div>
+    <div id="whatif-results"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="close-whatif-btn">Close</button>
+    </div>
   </div>
 </div>
 
